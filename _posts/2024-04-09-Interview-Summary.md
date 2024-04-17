@@ -150,9 +150,9 @@ top命令显示信息：
 通常是计算密集型任务，生成了大量耗时短的计算任务
 ```
 ### 4.常见的Linux命令
+<span style="color:#008000">touch：创建文件</span>
+<span style="color:#008011">cat：查看文件信息，一次性其全部显示</span>
+<span style="color:#008900">more：more和cat有点区别，more用于分屏显示文件内容。</span>
+<span style="color:#008670">less：和more类似，less用于分行显示</span>
+<span style="color:#006700">tail:一般用户tail -fn 100 xx.log查看最后的100行内容</span>
 
-<font color=#008000>touch：创建文件</font>
-<font color=#008011>cat：查看文件信息，一次性其全部显示</font>
-<font color=#008900>more：more和cat有点区别，more用于分屏显示文件内容。</font>
-<font color=#008670>less：和more类似，less用于分行显示</font>
-<font color=#006700>tail:一般用户tail -fn 100 xx.log查看最后的100行内容</font>
