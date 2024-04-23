@@ -323,4 +323,220 @@ int main()
 }  
 ```
 
-## 4.适配器模式
+## 4.适配器模式（结构型模式）
+c++ stl容器适配器使用了适配器模式，，栈（stack）、队列（queue）和优先队列（priority_queue），底层都是双端队列(deque)
+**这里双端队列就扮演了适配器的角色。队列用到了它的后端插入，前端删除。而栈用到了它的后端插入，后端删除。**
+UML图如下：
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/bc1e3c65-cc5c-4bff-b7bd-128c289b65cf)
+c++代码 如下；
+```c++
+class Deque{
+public:
+    void push_front(){};
+    void pop_front(){};
+    void push_back(){};
+    void pop_back(){};
+};
+
+class Sequence{
+public:
+    virtual void pop() = 0;
+    virtual void push() = 0;
+};
+
+class Stack : public Sequence{
+public:
+    void pop(){deque.pop_back();}
+    void push(){deque.push_back();}
+private:
+    Deque deque;
+};
+
+class Queue : Sequence{
+public:
+    void pop(){deque.pop_front();}
+    void push(){deque.push_back();};
+private:
+    Deque deque;
+};
+```
+
+## 5.原型模式（创建型模式），模板方法模式（行为型模式）
+
+原型模式：![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/3d71e8c0-38a2-46bd-868c-d38dbfca7570)
+原型模式实现的关键就是深拷贝：
+```c++
+//父类  
+class Resume  
+{  
+protected:  
+    char *name;  
+public:  
+    Resume() {}  
+    virtual ~Resume() {}  
+    virtual Resume* Clone() { return NULL; }  
+    virtual void Set(char *n) {}  
+    virtual void Show() {}  
+};
+
+class ResumeA : public Resume  
+{  
+public:  
+    ResumeA(const char *str);  //构造函数  
+    ResumeA(const ResumeA &r); //拷贝构造函数  
+    ~ResumeA();                //析构函数  
+    ResumeA* Clone();          //克隆，关键所在  
+    void Show();               //显示内容  
+};  
+ResumeA::ResumeA(const char *str)   
+{  
+    if(str == NULL) {  
+        name = new char[1];   
+        name[0] = '\0';   
+    }  
+    else {  
+        name = new char[strlen(str)+1];  
+        strcpy(name, str);  
+    }  
+}  
+ResumeA::~ResumeA() { delete [] name;}  
+ResumeA::ResumeA(const ResumeA &r) {  
+    name = new char[strlen(r.name)+1];  
+    strcpy(name, r.name);  
+}  
+ResumeA* ResumeA::Clone() {  
+    return new ResumeA(*this);  
+}  
+void ResumeA::Show() {  
+    cout<<"ResumeA name : "<<name<<endl;   
+}
+
+// 使用：
+int main()  
+{  
+    Resume *r1 = new ResumeA("A");  
+    Resume *r2 = new ResumeB("B");  
+    Resume *r3 = r1->Clone();  
+    Resume *r4 = r2->Clone();  
+    r1->Show(); r2->Show();  
+    //删除r1,r2  
+    delete r1; delete r2;     
+    r1 = r2 = NULL;  
+    //深拷贝所以对r3,r4无影响  
+    r3->Show(); r4->Show();  
+    delete r3; delete r4;  
+    r3 = r4 = NULL;  
+} 
+```
+**模板方法模式**
+父类构造一些方法，子类去实现这些方法
+```c++
+//简历  
+class Resume  
+{  
+protected: //保护成员  
+    virtual void SetPersonalInfo() {}  
+    virtual void SetEducation() {}  
+    virtual void SetWorkExp() {}  
+public:  
+    void FillResume()   
+    {  
+        SetPersonalInfo();  
+        SetEducation();  
+        SetWorkExp();  
+    }  
+};  
+class ResumeA: public Resume  
+{  
+protected:  
+    void SetPersonalInfo() { cout<<"A's PersonalInfo"<<endl; }  
+    void SetEducation() { cout<<"A's Education"<<endl; }  
+    void SetWorkExp() { cout<<"A's Work Experience"<<endl; }  
+};  
+class ResumeB: public Resume  
+{  
+protected:  
+    void SetPersonalInfo() { cout<<"B's PersonalInfo"<<endl; }  
+    void SetEducation() { cout<<"B's Education"<<endl; }  
+    void SetWorkExp() { cout<<"B's Work Experience"<<endl; }  
+};  
+```
+
+## 6.建造者模式（创建型模式）
+
+建造者模式的定义将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示（DP）。
+《大话设计模式》举了一个很好的例子——建造小人，一共需建造6个部分，头部、身体、左右手、左右脚。与工厂模式不同，建造者模式是在导向者的控制下一步一步构造产品的。建造小人就是在控制下一步步构造出来的。创建者模式可以能更精细的控制构建过程，从而能更精细的控制所得产品的内部结构。下面给出建造者模式的UML图，以建造小人为实例。
+
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/59acf893-7206-4940-a31f-671e37b4d5ba)
+对于客户来说，只需知道导向者就可以了，通过导向者，客户就能构造复杂的对象，而不需要知道具体的构造过程。下面给出小人例子的代码实现。
+```c++
+class Builder    
+{  
+public:  
+    virtual void BuildHead() {}  
+    virtual void BuildBody() {}  
+    virtual void BuildLeftArm(){}  
+    virtual void BuildRightArm() {}  
+    virtual void BuildLeftLeg() {}  
+    virtual void BuildRightLeg() {}  
+};  
+//构造瘦人  
+class ThinBuilder : public Builder  
+{  
+public:  
+    void BuildHead() { cout<<"build thin body"<<endl; }  
+    void BuildBody() { cout<<"build thin head"<<endl; }  
+    void BuildLeftArm() { cout<<"build thin leftarm"<<endl; }  
+    void BuildRightArm() { cout<<"build thin rightarm"<<endl; }  
+    void BuildLeftLeg() { cout<<"build thin leftleg"<<endl; }  
+    void BuildRightLeg() { cout<<"build thin rightleg"<<endl; }  
+};  
+//构造胖人  
+class FatBuilder : public Builder  
+{  
+public:  
+    void BuildHead() { cout<<"build fat body"<<endl; }  
+    void BuildBody() { cout<<"build fat head"<<endl; }  
+    void BuildLeftArm() { cout<<"build fat leftarm"<<endl; }  
+    void BuildRightArm() { cout<<"build fat rightarm"<<endl; }  
+    void BuildLeftLeg() { cout<<"build fat leftleg"<<endl; }  
+    void BuildRightLeg() { cout<<"build fat rightleg"<<endl; }  
+};  
+//构造的指挥官  
+class Director    
+{  
+private:  
+    Builder *m_pBuilder;  
+public:  
+    Director(Builder *builder) { m_pBuilder = builder; }  
+    void Create(){  
+        m_pBuilder->BuildHead();  
+        m_pBuilder->BuildBody();  
+        m_pBuilder->BuildLeftArm();  
+        m_pBuilder->BuildRightArm();  
+        m_pBuilder->BuildLeftLeg();  
+        m_pBuilder->BuildRightLeg();  
+    }  
+};
+
+```
+```c++
+//使用方法
+int main()
+{
+{
+    FatBuilder thin;  
+    Director director(&thin);  
+    director.Create();  
+}
+    
+{
+    FatBuilder thin;  
+    Director director(&thin);  
+    director.Create();  
+}
+    return 0;
+}  
+```
+
+## 7.外观模式（结构性模式）、组合模式（结构性模式）
