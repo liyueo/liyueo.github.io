@@ -525,7 +525,7 @@ public:
 int main()
 {
 {
-    FatBuilder thin;  
+    ThinBuilder thin;  
     Director director(&thin);  
     director.Create();  
 }
@@ -743,3 +743,411 @@ int main()
     return 0;  
 }
 ```
+
+**还有代理服务器的情况**
+以代理服务器为例进行代码编写，访问真正的服务器，需要通过代理服务器，代理服务器进行用户名密码校验，通过才允许访问真实服务器。
+```c++
+
+#include <bits/stdc++.h>
+
+//抽象类，抽象的主题类
+class AbstractServer {
+public:
+    virtual void Request() = 0;
+
+    virtual ~AbstractServer() = default;
+};
+
+//真正主题类，具体提供服务的类
+class RealServer : public AbstractServer {
+    void Request() override {
+        std::cout << "服务器启动..." << std::endl;
+    }
+
+};
+
+//代理服务器，非真正的服务器，访问真正服务器必须通过代理服务器
+class ProxyServer : public AbstractServer {
+public:
+    ProxyServer(const std::string &name, const std::string &pwd)
+            : m_name(name), m_pwd(pwd) {
+        m_pserver = std::make_shared<RealServer>();
+    }
+
+    // 和 真正主题类实现共同的接口，对外可以提供一致的接口！
+    void Request() override {
+        if (!CheckUser()) {
+            std::cout << "用户名或者密码错误..." << std::endl;
+            return;
+        }
+        std::cout << "校验用户名及密码成功..." << std::endl;
+        PreRequest();//额外附加的操作
+
+        m_pserver->Request();
+
+        PostRequest();//额外附加的操作
+    }
+
+private:
+    //访问服务器前 进行的动作，可以控制对真实主题类的访问
+    bool CheckUser() {
+        if ("admin" == m_name && "123456" == m_pwd) {
+            return true;
+        }
+        return false;
+    }
+
+    //真正访问服务器前 进行的动作
+    void PreRequest() {
+        std::cout << "进入代理服务器..." << std::endl;
+    }
+
+    //访问服务器之后 进行的动作
+    void PostRequest() {
+        std::cout << "服务器访问完毕..." << std::endl;
+    }
+
+
+private:
+    std::shared_ptr<AbstractServer> m_pserver;
+    std::string m_name;
+    std::string m_pwd;
+};
+
+//客户端 通过登录代理服务器 访问 真实服务器
+int main(int argc, char *argv[]) {
+    std::shared_ptr<AbstractServer> proxy = std::make_shared<ProxyServer>("admin", "123456");//登录代理服务器
+    proxy->Request();//通过代理服务器 访问真正服务器
+
+    return 0;
+    //运行结果如下：
+    //校验用户名及密码成功...
+    //进入代理服务器...
+    //服务器启动...
+    //服务器访问完毕...
+}
+```
+
+**下面介绍智能引用**
+auto_ptr(c++11已经摒弃，并提出unique_ptr来代替)
+ auto_ptr 类就是一个代理，客户只需操作auto_prt的对象，而不需要与被代理的指针pointee打交道。
+ ```c++
+template<class T>    
+class auto_ptr {    
+public:    
+    explicit auto_ptr(T *p = 0): pointee(p) {}    
+    auto_ptr(auto_ptr<T>& rhs): pointee(rhs.release()) {}    
+    ~auto_ptr() { delete pointee; }    
+    auto_ptr<T>& operator=(auto_ptr<T>& rhs)    
+    {    
+        if (this != &rhs) reset(rhs.release());    
+        return *this;    
+    }    
+    T& operator*() const { return *pointee; }    
+    T* operator->() const { return pointee; }    
+    T* get() const { return pointee; }    
+    T* release()    
+    {    
+        T *oldPointee = pointee;    
+        pointee = 0;    
+        return oldPointee;    
+    }    
+    void reset(T *p = 0)    
+    {    
+        if (pointee != p) {    
+               delete pointee;    
+               pointee = p;    
+            }    
+        }    
+private:    
+    T *pointee;    
+};    
+```
+同理还有shared_ptr
+```c++
+template <typename T>  
+class smart_ptr  
+{  
+public:  
+    smart_ptr(T *p = 0): pointee(p), count(new size_t(1)) { }  //初始的计数值为1  
+    smart_ptr(const smart_ptr &rhs): pointee(rhs.pointee), count(rhs.count) { ++*count; } //拷贝构造函数，计数加1  
+    ~smart_ptr() { decr_count(); }              //析构，计数减1，减到0时进行垃圾回收，即释放空间  
+    smart_ptr& operator= (const smart_ptr& rhs) //重载赋值操作符  
+    {  
+        //给自身赋值也对，因为如果自身赋值，计数器先减1，再加1，并未发生改变  
+        ++*count;  
+        decr_count();  
+        pointee = rhs.pointee;  
+        count = rhs.count;  
+        return *this;  
+    }    
+    //重载箭头操作符和解引用操作符，未提供指针的检查  
+    T *operator->() { return pointee; }  
+    const T *operator->() const { return pointee; }  
+    T &operator*() { return *pointee; }  
+    const T &operator*() const { return *pointee; }  
+    size_t get_refcount() { return *count; } //获得引用计数器值  
+private:   
+    T *pointee;       //实际指针，被代理    
+    size_t *count;    //引用计数器  
+    void decr_count() //计数器减1  
+    {  
+        if(--*count == 0)   
+        {  
+            delete pointee;  
+            delete count;  
+        }  
+    }  
+};  
+```
+
+## 9.享元模式（结构型模式）Flyweight Pattern
+享元模式是一种结构型的设计模式，，它允许你在消耗少量内存的情况下支持大量的对象。
+享元模式只有一个目的，将内存的消耗最小化，
+其定义为：运用共享技术有效地支持大量细粒度的对象。
+**用共享技术来有効地支持大量细粒度对象的复用。它通过共享已经存在的对象来大幅度减少需要创建的对象数量、避免大量相似类的开销，从而提高系统资源的利用率。**
+
+
+## 10.桥接模式（结构性设计模式）
+可将一个大类或一系列紧密相关的类拆分为抽象和实现两个独立的层次结构， 从而能在开发时分别使用。
+举两个例子
+1. 形状和颜色
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/2bf75303-52e5-4803-94e2-63d0977996c7)
+
+    可以分成
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/fd536605-7f7c-4871-8099-f73bf267b0e4)
+
+2. 计算机和操作系统
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/83efd646-15da-4ffb-890c-f574d7f0e534)
+
+```c++
+//操作系统  
+class OS  
+{  
+public:  
+    virtual void InstallOS_Imp() {}  
+};  
+class WindowOS: public OS  
+{  
+public:  
+    void InstallOS_Imp() { cout<<"安装Window操作系统"<<endl; }   
+};  
+class LinuxOS: public OS  
+{  
+public:  
+    void InstallOS_Imp() { cout<<"安装Linux操作系统"<<endl; }   
+};  
+class UnixOS: public OS  
+{  
+public:  
+    void InstallOS_Imp() { cout<<"安装Unix操作系统"<<endl; }   
+};  
+//计算机  
+class Computer  
+{  
+public:  
+    virtual void InstallOS(OS *os) {}  
+};  
+class DellComputer: public Computer  
+{  
+public:  
+    void InstallOS(OS *os) { os->InstallOS_Imp(); }  
+};  
+class AppleComputer: public Computer  
+{  
+public:  
+    void InstallOS(OS *os) { os->InstallOS_Imp(); }  
+};  
+class HPComputer: public Computer  
+{  
+public:  
+    void InstallOS(OS *os) { os->InstallOS_Imp(); }  
+};  
+```
+使用方法
+```c++
+int main()  
+{  
+    OS *os1 = new WindowOS();  
+    OS *os2 = new LinuxOS();  
+    Computer *computer1 = new AppleComputer();  
+    computer1->InstallOS(os1);  
+    computer1->InstallOS(os2);  
+}  
+```
+
+## 11.装饰模式(结构型设计模式)
+装饰模式：动态地给一个对象添加一些额外的职责。就增加功能来说，装饰模式相比生成子类更为灵活。**有时我们希望给某个对象而不是整个类添加一些功能**。比如有一个手机，允许你为手机添加特性，比如增加挂件、屏幕贴膜等。一种灵活的设计方式是，将手机嵌入到另一对象中，由这个对象完成特性的添加，我们称这个嵌入的对象为装饰。这个装饰与它所装饰的组件接口一致，因此它对使用该组件的客户透明。
+
+
+手机类：
+```c++
+//公共抽象类  
+class Phone  
+{  
+public:  
+    Phone() {}  
+    virtual ~Phone() {}  
+    virtual void ShowDecorate() {}  
+};  
+
+//具体的手机类  
+class iPhone : public Phone  
+{  
+private:  
+    string m_name; //手机名称  
+public:  
+    iPhone(string name): m_name(name){}  
+    ~iPhone() {}  
+    void ShowDecorate() { cout<<m_name<<"的装饰"<<endl;}  
+};  
+//具体的手机类  
+class NokiaPhone : public Phone  
+{  
+private:  
+    string m_name;  
+public:  
+    NokiaPhone(string name): m_name(name){}  
+    ~NokiaPhone() {}  
+    void ShowDecorate() { cout<<m_name<<"的装饰"<<endl;}  
+};  
+```
+
+装饰类
+```c++
+//装饰类  
+class DecoratorPhone : public Phone  
+{  
+private:  
+    Phone *m_phone;  //要装饰的手机  
+public:  
+    DecoratorPhone(Phone *phone): m_phone(phone) {}  
+    virtual void ShowDecorate() { m_phone->ShowDecorate(); }  
+};  
+//具体的装饰类  
+class DecoratorPhoneA : public DecoratorPhone  
+{  
+public:  
+    DecoratorPhoneA(Phone *phone) : DecoratorPhone(phone) {}  
+    void ShowDecorate() { DecoratorPhone::ShowDecorate(); AddDecorate(); }  
+private:  
+    void AddDecorate() { cout<<"增加挂件"<<endl; } //增加的装饰  
+};  
+//具体的装饰类  
+class DecoratorPhoneB : public DecoratorPhone  
+{  
+public:  
+    DecoratorPhoneB(Phone *phone) : DecoratorPhone(phone) {}  
+    void ShowDecorate() { DecoratorPhone::ShowDecorate(); AddDecorate(); }  
+private:  
+    void AddDecorate() { cout<<"屏幕贴膜"<<endl; } //增加的装饰  
+};  
+```
+
+调用,,只对某个对象进行装饰
+```c++
+int main()  
+{  
+    Phone *iphone = new NokiaPhone("6300");  
+    Phone *dpa = new DecoratorPhoneA(iphone); //装饰，增加挂件  
+    Phone *dpb = new DecoratorPhoneB(dpa);    //装饰，屏幕贴膜  
+    dpb->ShowDecorate();  
+    delete dpa;  
+    delete dpb;  
+    delete iphone;  
+    return 0;  
+}  
+```
+
+## 12.备忘录模式（行为型模式）
+定义：在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。这样以后就可将该对象恢复到原先保存的状态
+举个简单的例子，我们玩游戏时都会保存进度，所保存的进度以文件的形式存在。这样下次就可以继续玩，而不用从头开始。这里的进度其实就是游戏的内部状态，而这里的文件相当于是在游戏之外保存状态。这样，下次就可以从文件中读入保存的进度，从而恢复到原来的状态。这就是备忘录模式。
+
+```c++
+//需保存的信息  
+class Memento    
+{  
+public:  
+    int m_vitality; //生命值  
+    int m_attack;   //进攻值  
+    int m_defense;  //防守值  
+public:  
+    Memento(int vitality, int attack, int defense):   
+      m_vitality(vitality),m_attack(attack),m_defense(defense){}  
+    Memento& operator=(const Memento &memento)   
+    {  
+        m_vitality = memento.m_vitality;  
+        m_attack = memento.m_attack;  
+        m_defense = memento.m_defense;  
+        return *this;  
+    }  
+};  
+//游戏角色  
+class GameRole    
+{  
+private:  
+    int m_vitality;  
+    int m_attack;  
+    int m_defense;  
+public:  
+    GameRole(): m_vitality(100),m_attack(100),m_defense(100) {}  
+    Memento Save()  //保存进度，只与Memento对象交互，并不牵涉到Caretake  
+    {   
+        Memento memento(m_vitality, m_attack, m_defense);  
+        return memento;  
+    }  
+    void Load(Memento memento)  //载入进度，只与Memento对象交互，并不牵涉到Caretake  
+    {  
+        m_vitality = memento.m_vitality;  
+        m_attack = memento.m_attack;   
+        m_defense = memento.m_defense;  
+    }  
+    void Show() { cout<<"vitality : "<< m_vitality<<", attack : "<< m_attack<<", defense : "<< m_defense<<endl; }  
+    void Attack() { m_vitality -= 10; m_attack -= 10;  m_defense -= 10; }  
+};  
+//保存的进度库  
+class Caretake    
+{  
+public:  
+    Caretake() {}  
+    void Save(Memento menento) { m_vecMemento.push_back(menento); }  
+    Memento Load(int state) { return m_vecMemento[state]; }  
+private:  
+    vector<Memento> m_vecMemento;  
+};  
+```
+使用方法
+```c++
+//测试案例  
+int main()  
+{     
+    Caretake caretake;  
+    GameRole role;   
+    role.Show();   //初始值  
+    caretake.Save(role.Save()); //保存状态  
+    role.Attack();     
+    role.Show();  //进攻后  
+    role.Load(caretake.Load(0)); //载入状态   
+    role.Show();  //恢复到状态0  
+    return 0;  
+}  
+```
+
+## 13.中介者模式（行为型模式）
+用一个中介对象来封装一系列的对象交互。中介者使各对象不需要显式地相互引用，从而使其耦合松散，而且可以独立地改变它们之间的交互。中介者模式的例子很多，大到联合国安理会，小到房屋中介，都扮演了中间者的角色，协调各方利益。
+
+举个例子：
+中介对象（房屋中介），，对象交互（租客，房东）
+
+## 14.职责链模式
+职责链模式：使多个对象都有机会处理请求，从而避免请求的发送者和接收者之前的耦合关系，将这些对象连成一条链，并沿着这条链传递请求，直到有一个对象处理它为止。
+
+## 15.观察者模式(行为型模式)
+定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。它还有两个别名，依赖(Dependents)，发布-订阅(Publish-Subsrcibe)。可以举个博客订阅的例子，当博主发表新文章的时候，即博主状态发生了改变，那些订阅的读者就会收到通知，然后进行相应的动作，比如去看文章，或者收藏起来。博主与读者之间存在种一对多的依赖关系。下面给出相应的UML图设计。
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/722ca758-7ccc-4c1e-9994-1ea4a5a84f68)
+
+
+## 16.状态模式（行为型模式)
+状态模式：允许一个对象在其内部状态改变时改变它的行为。对象看起来似乎修改了它的类。它有两种使用情况：（1）一个对象的行为取决于它的状态, 并且它必须在运行时刻根据状态改变它的行为。（2）一个操作中含有庞大的多分支的条件语句，且这些分支依赖于该对象的状态。本文的例子为第一种情况，以战争为例，假设一场战争需经历四个阶段：前期、中期、后期、结束。当战争处于不同的阶段，战争的行为是不一样的，也就说战争的行为取决于所处的阶段，而且随着时间的推进是动态变化的。下面给出相应的UML图。
+
+![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/966473dc-08ed-4995-9c05-49173425fc8d)
