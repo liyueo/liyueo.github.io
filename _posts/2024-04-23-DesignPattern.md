@@ -1151,3 +1151,9 @@ int main()
 状态模式：允许一个对象在其内部状态改变时改变它的行为。对象看起来似乎修改了它的类。它有两种使用情况：（1）一个对象的行为取决于它的状态, 并且它必须在运行时刻根据状态改变它的行为。（2）一个操作中含有庞大的多分支的条件语句，且这些分支依赖于该对象的状态。本文的例子为第一种情况，以战争为例，假设一场战争需经历四个阶段：前期、中期、后期、结束。当战争处于不同的阶段，战争的行为是不一样的，也就说战争的行为取决于所处的阶段，而且随着时间的推进是动态变化的。下面给出相应的UML图。
 
 ![image](https://github.com/liyueo/liyueo.github.io/assets/119725085/966473dc-08ed-4995-9c05-49173425fc8d)
+
+
+参考：
+    https://zhuanlan.zhihu.com/p/431714886
+    https://refactoringguru.cn/design-patterns/state
+    https://www.cnblogs.com/schips/p/common-design-pattern-about-cpp.html
