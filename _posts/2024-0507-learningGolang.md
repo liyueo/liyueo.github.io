@@ -121,6 +121,9 @@ func main() {
 	// 空的切片默认值为 nil
 	var j []string
 	fmt.Println(j == nil) // true
+
+	// 第五种方式：使用make创建
+	slice1 = make([]int, 5, 10) // len = 5, cap = 10
 }
 ```
 
