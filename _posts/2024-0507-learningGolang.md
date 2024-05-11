@@ -11,7 +11,7 @@ tags:
     - go
 ---
 
-## GO项目的结构
+## 1. GO项目的结构
 
 ```
 myproject/
@@ -50,7 +50,7 @@ func main() {
 
 ```
 
-## 练习循环函数
+## 2. 练习循环函数
 牛顿法求Sqrt
 ```go
 package main
@@ -89,8 +89,8 @@ func main(){
 正确的： 13.341664064126334
 ```
 
-## 数组和切片 ，定义数组和定义切片的四种方式
-### 定义数组
+## 3. 数组和切片 ，定义数组和定义切片的四种方式
+### 3.1 定义数组
 ```go
 package main
  
@@ -166,3 +166,55 @@ func main() {
 }
 ```
 
+## 4. 函数闭包
+闭包函数：声明在一个函数中的函数，叫做闭包函数。
+闭包：内部函数总是可以访问其所在的外部函数中声明的参数和变量，即使在其外部函数被返回（寿命终结）了之后。
+可能会造成内存泄漏
+
+```go
+package main
+
+import "fmt"
+
+func adder() func(int) int {
+	sum := 0
+	return func(x int) int {
+		sum += x
+		return sum
+	}
+}
+
+func main() {
+	pos, neg := adder(), adder()
+	for i := 0; i < 10; i++ {
+		fmt.Println(
+			pos(i),
+			neg(-2*i),
+		)
+	}
+}
+```
+使用函数闭包实现一个 斐波那契数列
+
+```go
+package main
+
+import "fmt"
+
+// fibonacci 是返回一个「返回一个 int 的函数」的函数
+func fibonacci() func() int {
+	a, b := 0, 1
+	return func() int {
+		result := a
+		a, b = b, a+b
+		return result
+	}
+}
+
+func main() {
+	f := fibonacci()
+	for i := 0; i < 10; i++ {
+		fmt.Println(f())
+	}
+}
+```
