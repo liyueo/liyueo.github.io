@@ -11,6 +11,45 @@ tags:
     - go
 ---
 
+## GO项目的结构
+
+```
+myproject/
+├── main.go        // 顶级包的入口文件，包含程序的入口函数 func main()
+├── pkg1/
+│   ├── util.go    // 包 pkg1 的实现文件
+│   └── helper.go  // 包 pkg1 的实现文件
+├── pkg2/
+│   ├── lib.go     // 包 pkg2 的实现文件
+│   └── tools.go   // 包 pkg2 的实现文件
+└── README.md      // 项目文档或说明文件
+```
+
+**一个项目下可以有很多包，，每个包实现自己的功能，，每个文件都可以由自己的main()函数，，除了顶级包package main中的main函数之外，，其他的main函数只作测试用，
+package的main函数作为整个项目的入口**
+
+```go
+// main.go
+package main
+
+import (
+    "fmt"
+    "myproject/pkg1"
+    "myproject/pkg2"
+)
+
+func main() {
+    // 调用 pkg1 中的函数
+    result1 := pkg1.UtilFunction()
+    fmt.Println("Result from pkg1:", result1)
+
+    // 调用 pkg2 中的函数
+    result2 := pkg2.LibFunction()
+    fmt.Println("Result from pkg2:", result2)
+}
+
+```
+
 ## 练习循环函数
 牛顿法求Sqrt
 ```go
