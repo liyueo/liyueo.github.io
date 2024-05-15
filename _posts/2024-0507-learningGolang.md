@@ -219,3 +219,62 @@ func main() {
 	}
 }
 ```
+
+## 5. Stringer接口
+Stringer接口时fmt包中最常用的接口，，它的定义如下;
+```go
+type Stringer interface {
+    String() string
+}
+```
+自己定义的结构体可以去实现这个接口的方法String（），那么在输出fmt.Println()结构体的时候会输出这个方法的返回值。
+
+```go
+package main
+
+import "fmt"
+
+type Person struct {
+	Name string
+	Age  int
+}
+
+func (p Person) String() string {
+	return fmt.Sprintf("%v (%v years)", p.Name, p.Age)
+}
+
+func main() {
+	a := Person{"Arthur Dent", 42}
+	z := Person{"Zaphod Beeblebrox", 9001}
+	fmt.Println(a, z)
+}
+```
+
+```go
+return fmt.Sprintf("%v (%v years)", p.Name, p.Age)
+```
+Springf可以用来格式化语句，其他方方法：：
+```go
+// 1.
+result := "My name is " + p.name + ", and I am " + fmt.Sprintf("%d", p.age) + " years old."
+return result
+
+// 2.
+ageStr := "" + p.age // 将整数 p.age 转换为字符串
+result := "My name is " + p.name + ", and I am " + ageStr + " years old."
+return result
+
+// 3.
+// 使用 strconv.Itoa 将整数转换为字符串
+ageStr := strconv.Itoa(p.age)
+result := "My name is " + p.name + ", and I am " + ageStr + " years old."
+return result
+
+```
+第三种方法 Itoa ，，，c++中有 atoi  itoa
+
+常用的函数有：
+
+> strconv.Atoi()：用于将字符串转换为整数 (int)。
+> strconv.ParseInt()：用于将字符串转换为指定位数的整数 (int64)。
+> strconv.ParseUint()：用于将字符串转换为无符号整数 (uint64)。
