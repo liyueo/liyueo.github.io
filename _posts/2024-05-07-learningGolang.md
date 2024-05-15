@@ -89,6 +89,61 @@ func main(){
 正确的： 13.341664064126334
 ```
 
+**延伸**
+加上错误判断：
+```go
+type error interface {
+    Error() string
+}
+```
+go语言的错误接口
+```
+package main
+
+import (
+	"fmt"
+)
+
+type ErrNegativeSqrt float64
+
+func (e ErrNegativeSqrt) Error() string {
+	if e < 0 {
+		return fmt.Sprintf("cannot Sqrt negative number: %v", float64(e))
+	}
+	return ""
+}
+
+func Sqrt(x float64) (float64, error) {
+	if x >= 0 {
+		z := float64(1)
+		for i := 0; i < 10; i++ {
+			z -= (z*z - float64(x)) / 2 * z
+		}
+		return z, nil
+	} else {
+		return 0.0, ErrNegativeSqrt(x) // 若是错误，，将它转换成错误类型的float64
+	}
+}
+
+func main() {
+	// fmt.Println(Sqrt(2))
+	// fmt.Println(Sqrt(-2))
+	if result, err := Sqrt(2); err == nil {
+		fmt.Println(result)
+	} else {
+		fmt.Println(err)
+	}
+
+	if result, err := Sqrt(-2); err == nil {
+		fmt.Println(result)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+```
+
+
 ## 3. 数组和切片 ，定义数组和定义切片的四种方式
 ### 3.1 定义数组
 ```go
@@ -123,6 +178,7 @@ func main() {
 	fmt.Printf("数组为：%v 长度为：%v\n", arr4, len(arr4)) // 数组为：[12 1 0 234] 长度为：4，也就是3-1
 }
 ```
+
 ### 定义切片
 ```go
 package main
