@@ -1154,6 +1154,6 @@ int main()
 
 
 参考：
-    https://zhuanlan.zhihu.com/p/431714886
-    https://refactoringguru.cn/design-patterns/state
-    https://www.cnblogs.com/schips/p/common-design-pattern-about-cpp.html
+> https://zhuanlan.zhihu.com/p/431714886  
+> https://refactoringguru.cn/design-patterns/state  
+> https://www.cnblogs.com/schips/p/common-design-pattern-about-cpp.html  
