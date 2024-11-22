@@ -12,19 +12,18 @@ tags:
 ---
 
 
--- 问题总结，以免后面玩个卵
+<h1> 问题总结，以免后面忘了  </h1>
 
 
-1. Synchronized作用范围
-   <a href = 'https://cloud.tencent.com/developer/article/2184243'> Synchronized作用范围 </a>
- 类锁
-    修饰静态方法
-    修饰代码块
-    实战演练
-对象锁
-    修饰普通方法
-  修饰代码块
-
+1. Synchronized作用范围  
+   <a href = 'https://cloud.tencent.com/developer/article/2184243'> Synchronized作用范围 </a>  
+ -类锁  
+    --修饰静态方法  
+    --修饰代码块  
+-对象锁  
+    --修饰普通方法  
+  --修饰代码块  
+ 
 
 
 
