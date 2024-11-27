@@ -46,3 +46,11 @@ tags:
 
 
 
+## 4.**ActiveRecord**
+
+ActiveRecord属于orm层(对象关系映射层)，他的主要思想是：
+    每一个数据库表对应创建一个类，，类的每一个对象实例对应表中的一条记录，通常表中的每一个字段在类中都有相应的Field
+    ORM（object-Relational Mapping） 主要是为了解决 面向对象和关系数据库互相不匹配的问题。
+
+
+
