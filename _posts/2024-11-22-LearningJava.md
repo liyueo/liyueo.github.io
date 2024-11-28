@@ -54,4 +54,6 @@ ActiveRecord属于orm层(对象关系映射层)，他的主要思想是：
     ORM（object-Relational Mapping） 主要是为了解决 面向对象和关系数据库互相不匹配的问题。
 
 
+## 5. **RabbitMQ**  
+<a href = "https://developer.aliyun.com/article/769883"> RabbitMQ </a>  
 
