@@ -43,7 +43,7 @@ tags:
 
 
 <a href = "https://www.cnblogs.com/diffx/p/10611082.html" > Mybatis </a>  
-<a href = "https://juejin.cn/post/7010012164731699207"> MybatisPlus </a>
+<a href = "https://juejin.cn/post/7010012164731699207"> MybatisPlus </a>  
 
 
 
@@ -56,4 +56,6 @@ ActiveRecord属于orm层(对象关系映射层)，他的主要思想是：
 
 ## 5. **RabbitMQ**  
 <a href = "https://developer.aliyun.com/article/769883"> RabbitMQ </a>  
+<a href = "https://javabetter.cn/mq/rabbitmq-rumen.html"> Rabbitmq </a>  
+
 
