@@ -57,5 +57,8 @@ ActiveRecord属于orm层(对象关系映射层)，他的主要思想是：
 ## 5. **RabbitMQ**  
 <a href = "https://developer.aliyun.com/article/769883"> RabbitMQ </a>  
 <a href = "https://javabetter.cn/mq/rabbitmq-rumen.html"> Rabbitmq </a>  
+<a href = "https://www.cnblogs.com/CF1314/p/15015599.html"> 这个可能好点 </a>    
+ 
+
 
 
